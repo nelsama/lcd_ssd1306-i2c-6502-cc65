@@ -21,6 +21,39 @@ Sin framebuffer - escribe directamente al display para ahorrar RAM.
 
 - [i2c-6502-cc65](https://github.com/nelsama/i2c-6502-cc65) - Libreria I2C
 
+## Instalacion
+
+Clonar en la carpeta `libs/` de tu proyecto:
+
+```bash
+cd libs
+git clone https://github.com/nelsama/lcd_ssd1306-i2c-6502-cc65.git ssd1306
+```
+
+## Integracion con Makefile
+
+Agregar estas lineas a tu Makefile:
+
+```makefile
+# Directorios
+SSD1306_DIR = libs/ssd1306
+I2C_DIR = libs/i2c
+
+# Includes
+INCLUDES = -I$(SSD1306_DIR) -I$(I2C_DIR)
+
+# Objeto SSD1306
+SSD1306_OBJ = build/ssd1306.o
+
+# Regla de compilacion
+$(SSD1306_OBJ): $(SSD1306_DIR)/ssd1306.c
+$(CC65) $(CFLAGS) -I$(I2C_DIR) -I$(SSD1306_DIR) -o build/ssd1306.s $<
+$(CA65) -t none -o $@ build/ssd1306.s
+
+# Agregar a OBJS
+OBJS = ... $(SSD1306_OBJ) ...
+```
+
 ## Archivos
 
 - `ssd1306.h` - Header con prototipos de funciones
