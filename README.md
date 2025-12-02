@@ -1,88 +1,88 @@
-﻿# SSD1306 OLED Library for 6502 (cc65)
+﻿# Libreria SSD1306 OLED para 6502 (cc65)
 
-Driver for SSD1306 OLED displays (128x32) for 6502 microprocessor using cc65 compiler.
-No framebuffer - writes directly to display to save RAM.
+Driver para displays OLED SSD1306 (128x32) para microprocesador 6502 usando compilador cc65.
+Sin framebuffer - escribe directamente al display para ahorrar RAM.
 
-## Features
+## Caracteristicas
 
-- **Text**: Full ASCII font (32-126), uppercase and lowercase
-- **Numbers**: Decimal, signed, hexadecimal (8/16 bit)
-- **Graphics**: Lines, rectangles, progress bars, icons
-- **Effects**: Contrast control, invert, horizontal scroll
-- **Minimal RAM**: No framebuffer needed
+- **Texto**: Fuente ASCII completa (32-126), mayusculas y minusculas
+- **Numeros**: Decimal, con signo, hexadecimal (8/16 bits)
+- **Graficos**: Lineas, rectangulos, barras de progreso, iconos
+- **Efectos**: Control de contraste, inversion, scroll horizontal
+- **RAM minima**: No requiere framebuffer
 
 ## Hardware
 
 - Display: SSD1306 OLED 128x32 (0.91")
-- Interface: I2C at address 0x3C
-- Tested on: Tang Nano 9K FPGA with 6502 soft-core
+- Interfaz: I2C en direccion 0x3C
+- Probado en: FPGA Tang Nano 9K con soft-core 6502
 
-## Dependencies
+## Dependencias
 
-- [i2c-6502-cc65](https://github.com/nelsama/i2c-6502-cc65) - I2C library
+- [i2c-6502-cc65](https://github.com/nelsama/i2c-6502-cc65) - Libreria I2C
 
-## Files
+## Archivos
 
-- `ssd1306.h` - Header with function prototypes
-- `ssd1306.c` - Implementation
+- `ssd1306.h` - Header con prototipos de funciones
+- `ssd1306.c` - Implementacion
 
-## API Reference
+## Referencia de API
 
-### Basic Functions
+### Funciones Basicas
 
-| Function | Description |
-|----------|-------------|
-| `ssd1306_init()` | Initialize display (returns 1=OK, 0=error) |
-| `ssd1306_clear()` | Clear screen |
-| `ssd1306_display_on()` | Turn display on |
-| `ssd1306_display_off()` | Turn display off |
+| Funcion | Descripcion |
+|---------|-------------|
+| `ssd1306_init()` | Inicializar display (retorna 1=OK, 0=error) |
+| `ssd1306_clear()` | Limpiar pantalla |
+| `ssd1306_display_on()` | Encender display |
+| `ssd1306_display_off()` | Apagar display |
 
-### Display Control
+### Control de Display
 
-| Function | Description |
-|----------|-------------|
-| `ssd1306_set_contrast(0-255)` | Set brightness |
-| `ssd1306_invert(0/1)` | Invert colors |
-| `ssd1306_flip_h(0/1)` | Horizontal flip |
-| `ssd1306_flip_v(0/1)` | Vertical flip |
+| Funcion | Descripcion |
+|---------|-------------|
+| `ssd1306_set_contrast(0-255)` | Ajustar brillo |
+| `ssd1306_invert(0/1)` | Invertir colores |
+| `ssd1306_flip_h(0/1)` | Voltear horizontal |
+| `ssd1306_flip_v(0/1)` | Voltear vertical |
 
 ### Scroll
 
-| Function | Description |
-|----------|-------------|
-| `ssd1306_scroll_right(start, end, speed)` | Scroll right |
-| `ssd1306_scroll_left(start, end, speed)` | Scroll left |
-| `ssd1306_scroll_stop()` | Stop scrolling |
+| Funcion | Descripcion |
+|---------|-------------|
+| `ssd1306_scroll_right(inicio, fin, velocidad)` | Scroll derecha |
+| `ssd1306_scroll_left(inicio, fin, velocidad)` | Scroll izquierda |
+| `ssd1306_scroll_stop()` | Detener scroll |
 
-### Text
+### Texto
 
-| Function | Description |
-|----------|-------------|
-| `ssd1306_text(col, page, str)` | Write text |
-| `ssd1306_text_inv(col, page, str)` | Write inverted text |
-| `ssd1306_char(col, page, c)` | Write single character |
+| Funcion | Descripcion |
+|---------|-------------|
+| `ssd1306_text(col, pagina, str)` | Escribir texto |
+| `ssd1306_text_inv(col, pagina, str)` | Escribir texto invertido |
+| `ssd1306_char(col, pagina, c)` | Escribir un caracter |
 
-### Numbers
+### Numeros
 
-| Function | Description |
-|----------|-------------|
-| `ssd1306_number(col, page, num)` | Decimal unsigned (0-65535) |
-| `ssd1306_number_signed(col, page, num)` | Decimal signed |
-| `ssd1306_hex8(col, page, num)` | Hexadecimal 8-bit |
-| `ssd1306_hex16(col, page, num)` | Hexadecimal 16-bit |
+| Funcion | Descripcion |
+|---------|-------------|
+| `ssd1306_number(col, pagina, num)` | Decimal sin signo (0-65535) |
+| `ssd1306_number_signed(col, pagina, num)` | Decimal con signo |
+| `ssd1306_hex8(col, pagina, num)` | Hexadecimal 8 bits |
+| `ssd1306_hex16(col, pagina, num)` | Hexadecimal 16 bits |
 
-### Graphics
+### Graficos
 
-| Function | Description |
-|----------|-------------|
-| `ssd1306_hline(x, page, width, pattern)` | Horizontal line |
-| `ssd1306_fill_page(page, pattern)` | Fill page with pattern |
-| `ssd1306_rect(x, page, width, height)` | Rectangle |
-| `ssd1306_progress_bar(x, page, width, percent)` | Progress bar |
-| `ssd1306_icon8(col, page, icon)` | Draw 8x8 icon |
-| `ssd1306_clear_area(col, page, width)` | Clear area |
+| Funcion | Descripcion |
+|---------|-------------|
+| `ssd1306_hline(x, pagina, ancho, patron)` | Linea horizontal |
+| `ssd1306_fill_page(pagina, patron)` | Llenar pagina con patron |
+| `ssd1306_rect(x, pagina, ancho, alto)` | Rectangulo |
+| `ssd1306_progress_bar(x, pagina, ancho, porcentaje)` | Barra de progreso |
+| `ssd1306_icon8(col, pagina, icono)` | Dibujar icono 8x8 |
+| `ssd1306_clear_area(col, pagina, ancho)` | Limpiar area |
 
-## Example
+## Ejemplo
 
 ```c
 #include "ssd1306.h"
@@ -93,7 +93,7 @@ int main(void) {
     
     if (ssd1306_init()) {
         ssd1306_clear();
-        ssd1306_text(0, 0, "Hello 6502!");
+        ssd1306_text(0, 0, "Hola 6502!");
         ssd1306_text(0, 1, "SSD1306 OLED");
         ssd1306_number(0, 2, 12345);
         ssd1306_progress_bar(0, 3, 100, 75);
@@ -104,22 +104,22 @@ int main(void) {
 }
 ```
 
-## Coordinates
+## Coordenadas
 
-- **col**: Column position (0-127 pixels)
-- **page**: Row page (0-3, each page is 8 pixels high)
-- Display is 128x32 = 128 columns x 4 pages
+- **col**: Posicion columna (0-127 pixeles)
+- **pagina**: Pagina de fila (0-3, cada pagina tiene 8 pixeles de alto)
+- Display es 128x32 = 128 columnas x 4 paginas
 
-## Memory Usage
+## Uso de Memoria
 
-- Code: ~2.5KB
-- RAM: Minimal (no framebuffer)
-- Font: 475 bytes (95 characters x 5 bytes)
+- Codigo: ~2.5KB
+- RAM: Minima (sin framebuffer)
+- Fuente: 475 bytes (95 caracteres x 5 bytes)
 
-## License
+## Licencia
 
 MIT License
 
-## Author
+## Autor
 
 Nelson Madhavan (nelsama)
