@@ -57,6 +57,17 @@
 #define SSD1306_USE_SCROLL          1   /* Scroll horizontal */
 #define SSD1306_USE_CONTROL         1   /* Contraste, inversión */
 
+/* ============================================
+ * FRAMEBUFFER - Manipulación de píxeles
+ * Requiere 512 bytes de RAM
+ * ============================================ */
+#define SSD1306_USE_FRAMEBUFFER     0   /* Buffer básico + set/clear pixel */
+#define SSD1306_USE_FB_LINE         0   /* Líneas diagonales (Bresenham) */
+#define SSD1306_USE_FB_CIRCLE       0   /* Círculos */
+#define SSD1306_USE_FB_FILL         0   /* Rectángulos/círculos rellenos */
+#define SSD1306_USE_FB_PLOT         0   /* Gráficas de datos (+128 bytes) */
+#define SSD1306_USE_FB_SPRITE       0   /* Sprites con XOR/transparencia */
+
 /* No usados (para compatibilidad) */
 #define SSD1306_USE_FONT_5X7_UPPER  0
 #define SSD1306_USE_FONT_5X7_NUM    0

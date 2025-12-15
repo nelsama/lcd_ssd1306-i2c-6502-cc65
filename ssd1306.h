@@ -55,4 +55,9 @@
 #include "scroll/ssd1306_scroll.h"
 #endif
 
+/* Framebuffer (manipulación de píxeles) */
+#if SSD1306_USE_FRAMEBUFFER
+#include "framebuffer/ssd1306_framebuffer.h"
+#endif
+
 #endif /* SSD1306_H */

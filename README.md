@@ -29,8 +29,10 @@ libs/ssd1306/
 │   └── ssd1306_bigfont.c/h # Caracteres grandes
 ├── graphics/
 │   └── ssd1306_graphics.c/h # Líneas, rectángulos
-└── scroll/
-    └── ssd1306_scroll.c/h # Scroll horizontal
+├── scroll/
+│   └── ssd1306_scroll.c/h # Scroll horizontal
+└── framebuffer/
+    └── ssd1306_framebuffer.c/h # Píxeles individuales (512B RAM)
 ```
 
 ## Jerarquía y Dependencias
@@ -85,6 +87,7 @@ libs/ssd1306/
 | **TEXT** | CORE, FONT_5X7 | - |
 | **NUMBERS** | CORE, TEXT | NUMBERS_HEX |
 | **BIGNUM** | CORE | BIGNUM_LETTERS |
+| **FRAMEBUFFER** | CORE | FB_LINE, FB_CIRCLE, FB_FILL, FB_PLOT, FB_SPRITE |
 
 ### Configuraciones Típicas
 
@@ -93,6 +96,7 @@ Solo reloj:        CORE ──► BIGNUM
 Texto básico:      CORE ──► FONT_5X7 ──► TEXT
 Monitor de datos:  CORE ──► FONT_5X7 ──► TEXT ──► NUMBERS ──► NUMBERS_HEX
 Interfaz gráfica:  CORE ──► GRAPHICS ──► RECT ──► PROGRESS
+Juegos/Gráficas:   CORE ──► FRAMEBUFFER ──► FB_LINE ──► FB_CIRCLE
 Todo:              Todos los módulos activados
 ```
 
@@ -473,6 +477,219 @@ int main(void) {
     }
 }
 ```
+
+---
+
+## Framebuffer (Manipulación de Píxeles)
+
+Requiere: `SSD1306_USE_FRAMEBUFFER=1` (512 bytes RAM)
+
+El framebuffer mantiene una copia de la pantalla en RAM, permitiendo:
+- Set/clear píxeles individuales
+- Leer estado de píxeles
+- Líneas diagonales, círculos, formas geométricas
+- Sprites con transparencia/XOR
+- Gráficas de datos en tiempo real
+
+### Configuración Modular
+
+```c
+/* En ssd1306_config.h */
+#define SSD1306_USE_FRAMEBUFFER     1   /* Básico: 512B RAM */
+#define SSD1306_USE_FB_LINE         1   /* Líneas diagonales */
+#define SSD1306_USE_FB_CIRCLE       1   /* Círculos */
+#define SSD1306_USE_FB_FILL         1   /* Rellenos */
+#define SSD1306_USE_FB_PLOT         1   /* Gráficas (+128B RAM) */
+#define SSD1306_USE_FB_SPRITE       1   /* Sprites XOR */
+```
+
+### Funciones Básicas
+
+```c
+fb_init();              // Inicializar buffer (llenar con 0)
+fb_clear();             // Limpiar buffer
+fb_fill();              // Llenar todo de blanco
+fb_flush();             // Enviar buffer al display
+
+fb_set_pixel(x, y);     // Encender píxel
+fb_clear_pixel(x, y);   // Apagar píxel
+fb_toggle_pixel(x, y);  // Toggle (XOR)
+fb_get_pixel(x, y);     // Leer estado (0 o 1)
+```
+
+**Ejemplo - Dibujar y mostrar:**
+```c
+fb_init();
+fb_set_pixel(64, 16);   // Centro de la pantalla
+fb_set_pixel(65, 16);
+fb_set_pixel(64, 17);
+fb_flush();             // ¡Importante! Enviar al display
+```
+
+### Líneas (FB_LINE)
+
+```c
+fb_line(x0, y0, x1, y1);  // Línea diagonal (Bresenham)
+fb_hline(x, y, width);    // Línea horizontal (optimizada)
+fb_vline(x, y, height);   // Línea vertical (optimizada)
+fb_rect(x, y, w, h);      // Rectángulo (solo borde)
+```
+
+**Ejemplo - Triángulo:**
+```c
+fb_clear();
+fb_line(64, 0, 0, 31);    // Lado izquierdo
+fb_line(64, 0, 127, 31);  // Lado derecho
+fb_hline(0, 31, 128);     // Base
+fb_flush();
+```
+
+### Círculos (FB_CIRCLE)
+
+```c
+fb_circle(cx, cy, r);          // Círculo (solo borde)
+fb_circle_filled(cx, cy, r);   // Círculo relleno (requiere FB_FILL)
+```
+
+**Ejemplo:**
+```c
+fb_clear();
+fb_circle(64, 16, 15);         // Círculo grande
+fb_circle_filled(64, 16, 5);   // Punto central relleno
+fb_flush();
+```
+
+### Rectángulos Rellenos (FB_FILL)
+
+```c
+fb_rect_filled(x, y, w, h);    // Rectángulo sólido
+```
+
+### Gráficas de Datos (FB_PLOT)
+
+```c
+// Array de datos (valores 0-31 para altura)
+fb_plot(data, count, x_offset);
+
+// Con escala automática
+fb_plot_scaled(data, count, min_val, max_val);
+
+// Gráfica con scroll (añade punto, desplaza)
+fb_plot_scroll(new_value, min_val, max_val);
+```
+
+**Ejemplo - Gráfica de temperatura:**
+```c
+uint8_t temps[128];
+uint8_t idx = 0;
+
+void add_temperature(uint8_t temp) {
+    fb_plot_scroll(temp, 0, 50);  // Rango 0-50°C
+    fb_flush();
+}
+
+// En el loop principal:
+while (1) {
+    uint8_t t = leer_temperatura();
+    add_temperature(t);
+    delay(1000);
+}
+```
+
+### Sprites (FB_SPRITE)
+
+```c
+// Sprite con OR (píxeles se suman)
+fb_sprite(x, y, sprite_data, width, height);
+
+// Sprite con XOR (para cursor parpadeante)
+fb_sprite_xor(x, y, sprite_data, width, height);
+
+// Borrar área de sprite
+fb_sprite_clear(x, y, width, height);
+```
+
+**Ejemplo - Cursor parpadeante:**
+```c
+static const uint8_t cursor[8] = {
+    0xFF, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0xFF
+};
+
+// Parpadeo con XOR
+while (1) {
+    fb_sprite_xor(60, 12, cursor, 8, 8);
+    fb_flush();
+    delay(500);
+}
+```
+
+### Ejemplo Completo - Mini Pong
+
+```c
+#define BALL_SIZE 4
+#define PADDLE_H  8
+
+int ball_x = 64, ball_y = 16;
+int ball_dx = 1, ball_dy = 1;
+int paddle_y = 12;
+uint8_t score = 0;
+
+void game_loop(void) {
+    while (1) {
+        fb_clear();
+        
+        // Dibujar pelota
+        fb_rect_filled(ball_x, ball_y, BALL_SIZE, BALL_SIZE);
+        
+        // Dibujar paleta
+        fb_rect_filled(2, paddle_y, 2, PADDLE_H);
+        
+        // Mover pelota
+        ball_x += ball_dx;
+        ball_y += ball_dy;
+        
+        // Rebotes
+        if (ball_y <= 0 || ball_y >= 28) ball_dy = -ball_dy;
+        if (ball_x >= 124) ball_dx = -ball_dx;
+        
+        // Colisión paleta
+        if (ball_x <= 4 && ball_y >= paddle_y && ball_y < paddle_y + PADDLE_H) {
+            ball_dx = -ball_dx;
+            score++;
+        }
+        
+        // Game over
+        if (ball_x < 0) {
+            fb_clear();
+            // Mostrar puntuación...
+            break;
+        }
+        
+        // Control paleta
+        if (boton_arriba() && paddle_y > 0) paddle_y--;
+        if (boton_abajo() && paddle_y < 24) paddle_y++;
+        
+        fb_flush();
+        delay(30);
+    }
+}
+```
+
+---
+
+## Tamaños de ROM por Configuración
+
+| Configuración | Módulos | ROM | RAM |
+|---------------|---------|-----|-----|
+| Mínimo reloj | CORE + BIGNUM | ~2 KB | 0 |
+| Texto básico | CORE + FONT + TEXT | ~1.5 KB | 0 |
+| Con números | + NUMBERS | ~2 KB | 0 |
+| Con gráficos | + GRAPHICS | ~3.5 KB | 0 |
+| Framebuffer básico | + FRAMEBUFFER | +0.5 KB | +512B |
+| FB + líneas | + FB_LINE | +0.3 KB | +512B |
+| FB + círculos | + FB_CIRCLE | +0.4 KB | +512B |
+| FB + gráficas | + FB_PLOT | +0.5 KB | +640B |
+| Todo activado | Todos | ~8 KB | ~640B |
 
 ---
 
