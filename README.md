@@ -61,7 +61,9 @@ Edita `ssd1306_config.h` y cambia `1` (activado) o `0` (desactivado):
 #define SSD1306_USE_FRAMEBUFFER     0
 ```
 
-### Ejemplo 3: Juegos/Gráficas (~3 KB ROM, 512 B RAM)
+### Ejemplo 3: Solo Framebuffer (~2.5 KB ROM, 640 B RAM)
+
+Configuración mínima para demos gráficos sin texto:
 
 ```c
 #define SSD1306_USE_CORE            1
@@ -69,11 +71,16 @@ Edita `ssd1306_config.h` y cambia `1` (activado) o `0` (desactivado):
 #define SSD1306_USE_FB_LINE         1
 #define SSD1306_USE_FB_CIRCLE       1
 #define SSD1306_USE_FB_FILL         1
+#define SSD1306_USE_FB_PLOT         1
+#define SSD1306_USE_FB_SPRITE       1
 
+#define SSD1306_USE_FONT_5X7_FULL   0
 #define SSD1306_USE_TEXT            0
+#define SSD1306_USE_NUMBERS         0
 #define SSD1306_USE_BIGNUM          0
-#define SSD1306_USE_FB_PLOT         0
-#define SSD1306_USE_FB_SPRITE       0
+#define SSD1306_USE_GRAPHICS        0
+#define SSD1306_USE_SCROLL          0
+#define SSD1306_USE_CONTROL         0
 ```
 
 ### Ejemplo 4: Monitor con Gráfica (~3.5 KB ROM, 640 B RAM)
@@ -595,7 +602,7 @@ MIT License - Libre para uso personal y comercial.
 ### v1.1.0 (2025-01)
 - **Fix crítico:** Corregido overflow en `fb_line()` - Variables Bresenham cambiadas de `int8_t` a `int16_t` para soportar líneas de ancho completo (127 píxeles).
 - **Documentación:** Añadida advertencia sobre configuración de RAM vs stack de hardware del 6502.
-- **Nuevo:** Ejemplo de configuración solo-framebuffer (`ssd1306_config_fb_demo.h`).
+- **Documentación:** Añadido Ejemplo 3 "Solo Framebuffer" en sección de configuración.
 
 ### v1.0.0
 - Lanzamiento inicial con todos los módulos.
