@@ -30,6 +30,48 @@ git clone https://github.com/nelsama/lcd_ssd1306-i2c-6502-cc65.git ssd1306
 
 Edita `ssd1306_config.h` y cambia `1` (activado) o `0` (desactivado):
 
+### Opción 1: Editar directamente en la librería
+
+Modifica `ssd1306_config.h` en el directorio de la librería.
+
+### Opción 2: Config local en tu proyecto (Recomendado)
+
+Crea un archivo `ssd1306_config.h` en tu proyecto que sobrescriba los valores:
+
+```
+tu_proyecto/
+├── config/
+│   └── ssd1306/
+│       └── ssd1306_config.h   ← Tu configuración
+├── libs/
+│   └── ssd1306/               ← Librería sin modificar
+└── Makefile
+```
+
+**En tu Makefile**, incluye config antes que libs:
+```makefile
+INCLUDES = -Iconfig -Ilibs
+```
+
+**Tu `config/ssd1306/ssd1306_config.h`:**
+```c
+#ifndef SSD1306_CONFIG_H
+#define SSD1306_CONFIG_H
+
+#define SSD1306_USE_CORE            1
+#define SSD1306_USE_TEXT            1
+#define SSD1306_USE_FONT_5X7_FULL   1
+// Solo define lo que necesitas, el resto usa valores por defecto (0)
+
+#endif
+```
+
+La librería usa `#ifndef` para cada define, permitiendo que tu archivo local tenga prioridad.
+
+---
+
+## Ejemplos de Configuración
+
 ### Ejemplo 1: Solo Reloj BigFont (~2 KB ROM)
 
 ```c
