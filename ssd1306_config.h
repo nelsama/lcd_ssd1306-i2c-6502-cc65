@@ -61,11 +61,11 @@
  * FRAMEBUFFER - Manipulación de píxeles
  * Requiere 512 bytes de RAM
  * ============================================ */
-#define SSD1306_USE_FRAMEBUFFER     0   /* Buffer básico + set/clear pixel */
-#define SSD1306_USE_FB_LINE         0   /* Líneas diagonales (Bresenham) */
-#define SSD1306_USE_FB_CIRCLE       0   /* Círculos */
-#define SSD1306_USE_FB_FILL         0   /* Rectángulos/círculos rellenos */
-#define SSD1306_USE_FB_PLOT         0   /* Gráficas de datos (+128 bytes) */
+#define SSD1306_USE_FRAMEBUFFER     1   /* Buffer básico + set/clear pixel */
+#define SSD1306_USE_FB_LINE         1   /* Líneas diagonales (Bresenham) */
+#define SSD1306_USE_FB_CIRCLE       1   /* Círculos */
+#define SSD1306_USE_FB_FILL         1   /* Rectángulos/círculos rellenos */
+#define SSD1306_USE_FB_PLOT         1   /* Gráficas de datos (+128 bytes) */
 #define SSD1306_USE_FB_SPRITE       0   /* Sprites con XOR/transparencia */
 
 /* No usados (para compatibilidad) */
