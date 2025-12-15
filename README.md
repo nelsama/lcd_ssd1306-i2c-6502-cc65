@@ -399,6 +399,16 @@ Requiere: `FRAMEBUFFER=1` (512 bytes RAM)
 
 El framebuffer mantiene una copia de la pantalla en RAM, permitiendo manipular píxeles individuales.
 
+> **⚠️ IMPORTANTE - Configuración de Memoria:**  
+> El 6502 usa las direcciones `$0100-$01FF` para su stack de hardware (JSR/RTS/PHA/PLA/IRQ).  
+> **La RAM del proyecto debe comenzar en `$0200` o superior** para evitar conflictos.
+>
+> Ejemplo en `fpga.cfg`:
+> ```
+> RAM: start = $0200, size = $3C00, fill = yes, fillval = $00;
+> ```
+> Si la RAM comienza en `$0100`, las funciones de framebuffer (especialmente `fb_flush()`) pueden sobrescribir el stack y causar cuelgues.
+
 #### Funciones Básicas
 
 ```c
@@ -423,18 +433,20 @@ fb_flush();            // ¡Enviar al display!
 #### Líneas (FB_LINE)
 
 ```c
-void fb_line(int8_t x0, int8_t y0, int8_t x1, int8_t y1);  // Diagonal
-void fb_hline(uint8_t x, uint8_t y, uint8_t width);        // Horizontal
-void fb_vline(uint8_t x, uint8_t y, uint8_t height);       // Vertical
-void fb_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h);  // Rectángulo
+void fb_line(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);  // Diagonal (Bresenham)
+void fb_hline(uint8_t x, uint8_t y, uint8_t width);            // Horizontal rápida
+void fb_vline(uint8_t x, uint8_t y, uint8_t height);           // Vertical rápida
+void fb_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h);      // Rectángulo (solo borde)
 ```
+
+> **Nota técnica:** `fb_line()` usa el algoritmo de Bresenham con variables internas `int16_t` para evitar overflow en líneas largas (>127 píxeles de diferencia).
 
 **Ejemplo:**
 ```c
 fb_clear();
-fb_line(0, 0, 127, 31);     // Diagonal
-fb_line(0, 31, 127, 0);     // Diagonal cruzada
-fb_rect(10, 2, 108, 28);    // Marco
+fb_line(0, 0, 127, 31);     // Diagonal esquina a esquina
+fb_line(0, 31, 127, 0);     // Diagonal cruzada (X)
+fb_rect(10, 2, 108, 28);    // Marco rectangular
 fb_flush();
 ```
 
@@ -575,6 +587,18 @@ int main(void) {
 ## Licencia
 
 MIT License - Libre para uso personal y comercial.
+
+---
+
+## Changelog
+
+### v1.1.0 (2025-01)
+- **Fix crítico:** Corregido overflow en `fb_line()` - Variables Bresenham cambiadas de `int8_t` a `int16_t` para soportar líneas de ancho completo (127 píxeles).
+- **Documentación:** Añadida advertencia sobre configuración de RAM vs stack de hardware del 6502.
+- **Nuevo:** Ejemplo de configuración solo-framebuffer (`ssd1306_config_fb_demo.h`).
+
+### v1.0.0
+- Lanzamiento inicial con todos los módulos.
 
 ---
 

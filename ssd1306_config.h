@@ -35,38 +35,38 @@
 #define SSD1306_USE_CORE            1
 
 /* TEXTO PEQUEÑO 5x7 */
-#define SSD1306_USE_FONT_5X7_FULL   1   /* ASCII 32-126 (~475 bytes) */
-#define SSD1306_USE_TEXT            1   /* ssd1306_text() */
-#define SSD1306_USE_TEXT_INV        1   /* ssd1306_text_inv() */
+#define SSD1306_USE_FONT_5X7_FULL   0   /* ASCII 32-126 (~475 bytes) */
+#define SSD1306_USE_TEXT            0   /* ssd1306_text() */
+#define SSD1306_USE_TEXT_INV        0   /* ssd1306_text_inv() */
 
 /* NÚMEROS PEQUEÑOS */
-#define SSD1306_USE_NUMBERS         1   /* ssd1306_number() */
-#define SSD1306_USE_NUMBERS_HEX     1   /* ssd1306_hex8/16() */
+#define SSD1306_USE_NUMBERS         0   /* ssd1306_number() */
+#define SSD1306_USE_NUMBERS_HEX     0   /* ssd1306_hex8/16() */
 
 /* NÚMEROS GRANDES 15x15px */
-#define SSD1306_USE_BIGNUM          1   /* Dígitos 0-9 y símbolos */
-#define SSD1306_BIGNUM_LETTERS      1   /* Letras A-Z (~130 bytes) */
+#define SSD1306_USE_BIGNUM          0   /* Dígitos 0-9 y símbolos */
+#define SSD1306_BIGNUM_LETTERS      0   /* Letras A-Z (~130 bytes) */
 
-/* GRÁFICOS */
-#define SSD1306_USE_GRAPHICS        1   /* ssd1306_hline() */
-#define SSD1306_USE_RECT            1   /* ssd1306_rect() */
-#define SSD1306_USE_PROGRESS        1   /* ssd1306_progress_bar() */
-#define SSD1306_USE_ICONS           1   /* ssd1306_icon8() */
+/* GRÁFICOS DIRECTOS (sin framebuffer) */
+#define SSD1306_USE_GRAPHICS        0   /* ssd1306_hline() */
+#define SSD1306_USE_RECT            0   /* ssd1306_rect() */
+#define SSD1306_USE_PROGRESS        0   /* ssd1306_progress_bar() */
+#define SSD1306_USE_ICONS           0   /* ssd1306_icon8() */
 
 /* EXTRAS */
-#define SSD1306_USE_SCROLL          1   /* Scroll horizontal */
-#define SSD1306_USE_CONTROL         1   /* Contraste, inversión */
+#define SSD1306_USE_SCROLL          0   /* Scroll horizontal */
+#define SSD1306_USE_CONTROL         0   /* Contraste, inversión */
 
 /* ============================================
  * FRAMEBUFFER - Manipulación de píxeles
- * Requiere 512 bytes de RAM
+ * Requiere 512 bytes de RAM (+128 si FB_PLOT)
  * ============================================ */
 #define SSD1306_USE_FRAMEBUFFER     1   /* Buffer básico + set/clear pixel */
-#define SSD1306_USE_FB_LINE         1   /* Líneas diagonales (Bresenham) */
-#define SSD1306_USE_FB_CIRCLE       1   /* Círculos */
+#define SSD1306_USE_FB_LINE         1   /* Líneas diagonales (Bresenham) + rect */
+#define SSD1306_USE_FB_CIRCLE       1   /* Círculos (Midpoint) */
 #define SSD1306_USE_FB_FILL         1   /* Rectángulos/círculos rellenos */
-#define SSD1306_USE_FB_PLOT         1   /* Gráficas de datos (+128 bytes) */
-#define SSD1306_USE_FB_SPRITE       0   /* Sprites con XOR/transparencia */
+#define SSD1306_USE_FB_PLOT         1   /* Gráficas de datos (+128 bytes RAM) */
+#define SSD1306_USE_FB_SPRITE       1   /* Sprites con OR/XOR */
 
 /* No usados (para compatibilidad) */
 #define SSD1306_USE_FONT_5X7_UPPER  0

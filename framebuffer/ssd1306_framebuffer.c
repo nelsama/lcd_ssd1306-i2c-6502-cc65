@@ -44,44 +44,48 @@ void fb_flush(void) {
     
     for (page = 0; page < SSD1306_PAGES; page++) {
         ssd1306_set_pos(0, page);
-        i2c_start(SSD1306_I2C_ADDR);
-        i2c_write(0x40);  /* Data mode */
+        i2c_start(SSD1306_ADDR, I2C_WRITE);
+        i2c_write_byte(0x40);  /* Data mode */
         for (col = 0; col < SSD1306_WIDTH; col++) {
-            i2c_write(framebuffer[page * SSD1306_WIDTH + col]);
+            i2c_write_byte(framebuffer[page * SSD1306_WIDTH + col]);
         }
         i2c_stop();
     }
 }
 
 void fb_set_pixel(uint8_t x, uint8_t y) {
+    uint8_t page, bit;
     if (x >= SSD1306_WIDTH || y >= SSD1306_HEIGHT) return;
     
-    uint8_t page = y >> 3;          /* y / 8 */
-    uint8_t bit = y & 0x07;         /* y % 8 */
+    page = y >> 3;          /* y / 8 */
+    bit = y & 0x07;         /* y % 8 */
     framebuffer[page * SSD1306_WIDTH + x] |= (1 << bit);
 }
 
 void fb_clear_pixel(uint8_t x, uint8_t y) {
+    uint8_t page, bit;
     if (x >= SSD1306_WIDTH || y >= SSD1306_HEIGHT) return;
     
-    uint8_t page = y >> 3;
-    uint8_t bit = y & 0x07;
+    page = y >> 3;
+    bit = y & 0x07;
     framebuffer[page * SSD1306_WIDTH + x] &= ~(1 << bit);
 }
 
 void fb_toggle_pixel(uint8_t x, uint8_t y) {
+    uint8_t page, bit;
     if (x >= SSD1306_WIDTH || y >= SSD1306_HEIGHT) return;
     
-    uint8_t page = y >> 3;
-    uint8_t bit = y & 0x07;
+    page = y >> 3;
+    bit = y & 0x07;
     framebuffer[page * SSD1306_WIDTH + x] ^= (1 << bit);
 }
 
 uint8_t fb_get_pixel(uint8_t x, uint8_t y) {
+    uint8_t page, bit;
     if (x >= SSD1306_WIDTH || y >= SSD1306_HEIGHT) return 0;
     
-    uint8_t page = y >> 3;
-    uint8_t bit = y & 0x07;
+    page = y >> 3;
+    bit = y & 0x07;
     return (framebuffer[page * SSD1306_WIDTH + x] >> bit) & 0x01;
 }
 
@@ -95,17 +99,17 @@ uint8_t* fb_get_buffer(void) {
 #if SSD1306_USE_FB_LINE
 
 /* Valor absoluto */
-static int8_t fb_abs(int8_t x) {
+static int16_t fb_abs(int16_t x) {
     return (x < 0) ? -x : x;
 }
 
 void fb_line(int8_t x0, int8_t y0, int8_t x1, int8_t y1) {
-    int8_t dx = fb_abs(x1 - x0);
-    int8_t dy = -fb_abs(y1 - y0);
+    int16_t dx = fb_abs(x1 - x0);
+    int16_t dy = -fb_abs(y1 - y0);
     int8_t sx = (x0 < x1) ? 1 : -1;
     int8_t sy = (y0 < y1) ? 1 : -1;
-    int8_t err = dx + dy;
-    int8_t e2;
+    int16_t err = dx + dy;
+    int16_t e2;
     
     while (1) {
         fb_set_pixel(x0, y0);
