@@ -118,11 +118,37 @@ Todo:              Todos los módulos activados
 Edita `ssd1306_config.h` para activar/desactivar módulos:
 
 ```c
-/* Solo BigFont para reloj (~2KB) */
+/* Solo BigFont para reloj (~2KB ROM, 0 RAM) */
 #define SSD1306_USE_CORE            1
 #define SSD1306_USE_BIGNUM          1
 #define SSD1306_USE_TEXT            0  // Desactivado
 #define SSD1306_USE_GRAPHICS        0  // Desactivado
+#define SSD1306_USE_FRAMEBUFFER     0  // Desactivado
+```
+
+```c
+/* Juegos con gráficos vectoriales (~3KB ROM, 512B RAM) */
+#define SSD1306_USE_CORE            1
+#define SSD1306_USE_TEXT            0
+#define SSD1306_USE_BIGNUM          0
+#define SSD1306_USE_FRAMEBUFFER     1  // Activado
+#define SSD1306_USE_FB_LINE         1  // Líneas diagonales
+#define SSD1306_USE_FB_CIRCLE       1  // Círculos
+#define SSD1306_USE_FB_FILL         1  // Rellenos
+#define SSD1306_USE_FB_PLOT         0  // No necesario
+#define SSD1306_USE_FB_SPRITE       0  // No necesario
+```
+
+```c
+/* Monitor de datos con gráfica (~3.5KB ROM, 640B RAM) */
+#define SSD1306_USE_CORE            1
+#define SSD1306_USE_TEXT            1
+#define SSD1306_USE_NUMBERS         1
+#define SSD1306_USE_FRAMEBUFFER     1
+#define SSD1306_USE_FB_LINE         0
+#define SSD1306_USE_FB_CIRCLE       0
+#define SSD1306_USE_FB_FILL         0
+#define SSD1306_USE_FB_PLOT         1  // Gráficas de datos
 ```
 
 ## Uso Básico
