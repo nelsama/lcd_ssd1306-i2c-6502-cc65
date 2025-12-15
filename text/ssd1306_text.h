@@ -6,7 +6,7 @@
 #define SSD1306_TEXT_H
 
 #include <stdint.h>
-#include "../ssd1306_config.h"
+#include <ssd1306/ssd1306_config.h>
 
 #if SSD1306_USE_TEXT
 

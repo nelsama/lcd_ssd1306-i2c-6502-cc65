@@ -12,8 +12,8 @@
 #ifndef SSD1306_H
 #define SSD1306_H
 
-/* Configuración */
-#include "ssd1306_config.h"
+/* Configuración - busca primero en paths de -I, luego local */
+#include <ssd1306/ssd1306_config.h>
 
 /* Core (siempre necesario) */
 #if SSD1306_USE_CORE

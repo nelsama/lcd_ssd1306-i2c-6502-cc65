@@ -8,7 +8,7 @@
 #define SSD1306_CORE_H
 
 #include <stdint.h>
-#include "../ssd1306_config.h"
+#include <ssd1306/ssd1306_config.h>
 
 /* Comandos SSD1306 */
 #define SSD1306_CMD         0x00

@@ -6,7 +6,7 @@
 #define SSD1306_FONT_H
 
 #include <stdint.h>
-#include "../ssd1306_config.h"
+#include <ssd1306/ssd1306_config.h>
 
 /* Obtener puntero a glyph de un caracter */
 const uint8_t* font_get_glyph(char c);
