@@ -65,9 +65,6 @@ void ssd1306_bignum_time(uint8_t x, uint8_t page, uint8_t hours, uint8_t minutes
 /* Dibujar hora HH:MM centrada */
 void ssd1306_bignum_time_centered(uint8_t hours, uint8_t minutes);
 
-/* Dibujar hora HH:MM:SS centrada */
-void ssd1306_bignum_time_full(uint8_t hours, uint8_t minutes, uint8_t seconds);
-
 /* Dibujar número de 2 dígitos (00-99) */
 void ssd1306_bignum_2digit(uint8_t x, uint8_t page, uint8_t num);
 

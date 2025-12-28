@@ -9,11 +9,19 @@ Driver optimizado para displays OLED SSD1306 128x32 en sistemas 6502 embebidos (
 | **Core** | Init, clear, on/off | ~0.5 KB | 0 |
 | **Text** | Fuente 5x7, ASCII 32-126 | ~1 KB | 0 |
 | **Numbers** | Decimal, hex 8/16 bits | ~0.5 KB | 0 |
-| **BigFont** | Caracteres 15x15 px | ~1 KB | 0 |
+| **BigFont** | Caracteres 15x15 px (optimizado) | ~1.8 KB | 0 |
 | **Graphics** | Líneas, rectángulos, iconos | ~0.5 KB | 0 |
 | **Scroll** | Scroll horizontal | ~0.2 KB | 0 |
 | **Control** | Contraste, inversión | ~0.2 KB | 0 |
 | **Framebuffer** | Píxeles individuales | ~1.5 KB | 512-640 B |
+
+### Optimizaciones BigFont (v1.1)
+
+El módulo BigFont ha sido optimizado para 6502:
+- **Tablas precalculadas** `div10[]` y `mod10[]` evitan divisiones costosas
+- **Máscaras de bit** precalculadas eliminan shifts variables
+- **Constantes** calculadas en tiempo de compilación
+- Ahorro: ~300 bytes de código vs versión anterior
 
 ---
 

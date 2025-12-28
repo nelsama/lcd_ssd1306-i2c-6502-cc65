@@ -1,12 +1,14 @@
 /**
- * ssd1306_bigfont.c - Fuente grande estilo pixel art
+ * ssd1306_bigfont.c - Fuente grande estilo pixel art (OPTIMIZADO)
  * 
  * Sistema de píxeles grandes (bloques de 3×3 píxeles)
  * Cada caracter es una matriz de 5×5 "píxeles grandes"
  * Tamaño final: 15×15 píxeles por caracter
  * 
- * 8 caracteres por línea, 2 líneas en pantalla
- * Soporte para centrado vertical (línea única)
+ * Optimizaciones:
+ * - Tabla precalculada para divisiones (evita / y % costosos en 6502)
+ * - Máscaras precalculadas (evita shifts variables)
+ * - Funciones unificadas
  */
 
 #include "ssd1306_bigfont.h"
@@ -16,27 +18,35 @@
 #if SSD1306_USE_BIGNUM
 
 /* ============================================
- * DEFINICIÓN DE CARACTERES 5×5
- * ============================================
- * 
- * Cada caracter es una matriz de 5 columnas × 5 filas de bits.
- * Cada byte representa una COLUMNA (5 bits usados, del bit 4 al 0)
- * 
- * Bit 4 = fila superior
- * Bit 0 = fila inferior
- * 
- * Ejemplo "0":
- *   █████   col0: 11111 = 0x1F
- *   █   █   col1: 10001 = 0x11
- *   █   █   col2: 10001 = 0x11
- *   █   █   col3: 10001 = 0x11
- *   █████   col4: 11111 = 0x1F
- */
+ * TABLAS DE OPTIMIZACIÓN
+ * ============================================ */
 
-/* Dígitos 0-9 (5 bytes por carácter = columnas)
- * Bit 4 = fila 0 (arriba), Bit 0 = fila 4 (abajo)
- * Columnas de izquierda (0) a derecha (4)
- */
+/* Tabla para división por 10: div10[n] = n/10 para n=0..99 */
+static const uint8_t div10[100] = {
+    0,0,0,0,0,0,0,0,0,0, 1,1,1,1,1,1,1,1,1,1,
+    2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,3,3,
+    4,4,4,4,4,4,4,4,4,4, 5,5,5,5,5,5,5,5,5,5,
+    6,6,6,6,6,6,6,6,6,6, 7,7,7,7,7,7,7,7,7,7,
+    8,8,8,8,8,8,8,8,8,8, 9,9,9,9,9,9,9,9,9,9
+};
+
+/* Tabla para módulo 10: mod10[n] = n%10 para n=0..99 */
+static const uint8_t mod10[100] = {
+    0,1,2,3,4,5,6,7,8,9, 0,1,2,3,4,5,6,7,8,9,
+    0,1,2,3,4,5,6,7,8,9, 0,1,2,3,4,5,6,7,8,9,
+    0,1,2,3,4,5,6,7,8,9, 0,1,2,3,4,5,6,7,8,9,
+    0,1,2,3,4,5,6,7,8,9, 0,1,2,3,4,5,6,7,8,9,
+    0,1,2,3,4,5,6,7,8,9, 0,1,2,3,4,5,6,7,8,9
+};
+
+/* Máscaras de bit precalculadas (evita 0x01 << n) */
+static const uint8_t bit_mask[5] = {0x01, 0x02, 0x04, 0x08, 0x10};
+
+/* ============================================
+ * DEFINICIÓN DE CARACTERES 5×5
+ * ============================================ */
+
+/* Dígitos 0-9 (5 bytes por carácter = columnas) */
 static const uint8_t bigfont_digits[][5] = {
     /* 0 */  {0x0E, 0x11, 0x11, 0x11, 0x0E},
     /* 1 */  {0x00, 0x12, 0x1F, 0x10, 0x00},
@@ -132,7 +142,7 @@ static const uint8_t row_pattern_p0[5] = {0x07, 0x38, 0xC0, 0x00, 0x00};
 /* Patrón para página 1 por cada fila de bloques */
 static const uint8_t row_pattern_p1[5] = {0x00, 0x00, 0x01, 0x0E, 0x70};
 
-/* Dibujar un carácter grande */
+/* Dibujar un carácter grande (OPTIMIZADO: usa máscaras precalculadas) */
 void ssd1306_bigchar(uint8_t x, uint8_t page, char c) {
     const uint8_t *pattern;
     uint8_t data_col;      /* Columna de datos (0-4) */
@@ -151,11 +161,10 @@ void ssd1306_bigchar(uint8_t x, uint8_t page, char c) {
     for (data_col = 0; data_col < 5; data_col++) {
         col_bits = pattern[data_col];
         
-        /* Calcular byte para página 0 */
+        /* Calcular byte para página 0 usando máscaras precalculadas */
         byte_p0 = 0;
         for (data_row = 0; data_row < 5; data_row++) {
-            /* Bit 0 = fila 0 (arriba), bit 4 = fila 4 (abajo) */
-            if (col_bits & (0x01 << data_row)) {
+            if (col_bits & bit_mask[data_row]) {
                 byte_p0 |= row_pattern_p0[data_row];
             }
         }
@@ -175,10 +184,10 @@ void ssd1306_bigchar(uint8_t x, uint8_t page, char c) {
     for (data_col = 0; data_col < 5; data_col++) {
         col_bits = pattern[data_col];
         
-        /* Calcular byte para página 1 */
+        /* Calcular byte para página 1 usando máscaras precalculadas */
         byte_p1 = 0;
         for (data_row = 0; data_row < 5; data_row++) {
-            if (col_bits & (0x01 << data_row)) {
+            if (col_bits & bit_mask[data_row]) {
                 byte_p1 |= row_pattern_p1[data_row];
             }
         }
@@ -266,21 +275,21 @@ void ssd1306_bignum_colon(uint8_t x, uint8_t page) {
     ssd1306_bigchar(x, page, ':');
 }
 
-/* Dibujar número de 2 dígitos */
+/* Dibujar número de 2 dígitos (usa tablas precalculadas) */
 void ssd1306_bignum_2digit(uint8_t x, uint8_t page, uint8_t num) {
     if (num > 99) num = 99;
-    ssd1306_bigchar(x, page, '0' + (num / 10));
-    ssd1306_bigchar(x + BIGFONT_CHAR_W + BIGFONT_SPACING, page, '0' + (num % 10));
+    ssd1306_bigchar(x, page, '0' + div10[num]);
+    ssd1306_bigchar(x + BIGFONT_CHAR_W + BIGFONT_SPACING, page, '0' + mod10[num]);
 }
 
-/* Dibujar hora HH:MM en posición específica */
+/* Dibujar hora HH:MM en posición específica (usa tablas precalculadas) */
 void ssd1306_bignum_time(uint8_t x, uint8_t page, uint8_t hours, uint8_t minutes) {
     uint8_t pos = x;
     
     /* HH */
-    ssd1306_bigchar(pos, page, '0' + (hours / 10));
+    ssd1306_bigchar(pos, page, '0' + div10[hours]);
     pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
-    ssd1306_bigchar(pos, page, '0' + (hours % 10));
+    ssd1306_bigchar(pos, page, '0' + mod10[hours]);
     pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
     
     /* : */
@@ -288,64 +297,33 @@ void ssd1306_bignum_time(uint8_t x, uint8_t page, uint8_t hours, uint8_t minutes
     pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
     
     /* MM */
-    ssd1306_bigchar(pos, page, '0' + (minutes / 10));
+    ssd1306_bigchar(pos, page, '0' + div10[minutes]);
     pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
-    ssd1306_bigchar(pos, page, '0' + (minutes % 10));
+    ssd1306_bigchar(pos, page, '0' + mod10[minutes]);
 }
 
-/* Dibujar hora HH:MM centrada */
+/* Dibujar hora HH:MM centrada (constantes precalculadas) */
 void ssd1306_bignum_time_centered(uint8_t hours, uint8_t minutes) {
-    /* HH:MM = 5 caracteres, ~80px de ancho */
-    /* Centrar: (128 - 80) / 2 = 24 */
-    uint8_t width = 5 * BIGFONT_CHAR_W + 4 * BIGFONT_SPACING;  /* 79 px */
-    uint8_t x = (128 - width) / 2;
-    
-    ssd1306_bignum_time(x, BIGFONT_CENTER, hours, minutes);
+    /* HH:MM = 5 caracteres, ancho = 5*15 + 4*1 = 79px */
+    /* x = (128 - 79) / 2 = 24 (constante) */
+    ssd1306_bignum_time(24, BIGFONT_CENTER, hours, minutes);
 }
 
-/* Dibujar hora HH:MM:SS centrada */
-void ssd1306_bignum_time_full(uint8_t hours, uint8_t minutes, uint8_t seconds) {
-    /* HH:MM:SS = 8 caracteres */
-    uint8_t width = 8 * BIGFONT_CHAR_W + 7 * BIGFONT_SPACING;  /* 127 px */
-    uint8_t x = (128 - width) / 2;
-    uint8_t pos = x;
-    
-    /* HH */
-    ssd1306_bigchar(pos, BIGFONT_CENTER, '0' + (hours / 10));
-    pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
-    ssd1306_bigchar(pos, BIGFONT_CENTER, '0' + (hours % 10));
-    pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
-    
-    /* : */
-    ssd1306_bigchar(pos, BIGFONT_CENTER, ':');
-    pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
-    
-    /* MM */
-    ssd1306_bigchar(pos, BIGFONT_CENTER, '0' + (minutes / 10));
-    pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
-    ssd1306_bigchar(pos, BIGFONT_CENTER, '0' + (minutes % 10));
-    pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
-    
-    /* : */
-    ssd1306_bigchar(pos, BIGFONT_CENTER, ':');
-    pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
-    
-    /* SS */
-    ssd1306_bigchar(pos, BIGFONT_CENTER, '0' + (seconds / 10));
-    pos += BIGFONT_CHAR_W + BIGFONT_SPACING;
-    ssd1306_bigchar(pos, BIGFONT_CENTER, '0' + (seconds % 10));
-}
-
-/* Dibujar número grande */
+/* Dibujar número grande (0-9999) usando tablas */
 void ssd1306_bignum_number(uint8_t x, uint8_t page, uint16_t num, uint8_t digits) {
     uint8_t d[4];
     uint8_t i;
     uint8_t pos = x;
+    uint8_t h, l;
     
-    d[0] = (num / 1000) % 10;
-    d[1] = (num / 100) % 10;
-    d[2] = (num / 10) % 10;
-    d[3] = num % 10;
+    /* Dividir en high (num/100) y low (num%100) */
+    h = num / 100;
+    l = num - (h * 100);  /* Más eficiente que % */
+    
+    d[0] = div10[h];      /* miles */
+    d[1] = mod10[h];      /* centenas */
+    d[2] = div10[l];      /* decenas */
+    d[3] = mod10[l];      /* unidades */
     
     for (i = 4 - digits; i < 4; i++) {
         ssd1306_bigchar(pos, page, '0' + d[i]);
