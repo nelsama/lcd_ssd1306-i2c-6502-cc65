@@ -641,6 +641,14 @@ int main(void) {
 
 ---
 
+## 💖 Apóyame
+
+Si disfrutas de este proyecto, considera apoyarme:
+
+[![Support me on Ko-fi](https://img.shields.io/badge/Ko--fi-Apóyame-FF5E5B?logo=kofi&logoColor=white&style=for-the-badge)](https://ko-fi.com/nelsonfigueroa2k)
+
+---
+
 ## Licencia
 
 MIT License - Libre para uso personal y comercial.
